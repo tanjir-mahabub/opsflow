@@ -26,9 +26,10 @@ A modern service-business operations platform built as a senior-level Angular an
 - Frontend: Vercel, root directory frontend
 - Backend: Render Blueprint using render.yaml
 - Database: Supabase PostgreSQL
-- Set Render DATABASE_URL to the Supabase connection string.
-- Set Render CORS_ORIGINS to the final Vercel URL.
+- Set Render DATABASE_URL to the Supabase pooled connection string (Transaction mode, port 6543) and append `?ssl=require`.
+- Vercel production and preview domains are accepted by the configured CORS regex.
 - Update environment.production.ts if Render assigns a different service URL.
+- PostgreSQL tables have RLS enabled automatically, preventing accidental direct access through Supabase's public Data API.
 
 ## Run frontend
 
