@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import require_roles
 from app.core.database import get_db
 from app.models import Customer, User
-from app.schemas.domain import CustomerCreate, CustomerOut
+from app.schemas.domain import CustomerCreate, CustomerOut, CustomerUpdate
 
 router = APIRouter()
 
@@ -28,3 +28,22 @@ async def get_customer(customer_id: int, db: AsyncSession = Depends(get_db), _: 
     customer = await db.get(Customer, customer_id)
     if not customer: raise HTTPException(status_code=404, detail="Customer not found")
     return customer
+
+@router.patch("/{customer_id}", response_model=CustomerOut)
+async def update_customer(customer_id: int, data: CustomerUpdate, db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin","manager"))):
+    customer = await db.get(Customer, customer_id)
+    if not customer: raise HTTPException(status_code=404, detail="Customer not found")
+    values = data.model_dump(exclude_unset=True)
+    if "email" in values and await db.scalar(select(Customer).where(Customer.email == values["email"], Customer.id != customer_id)):
+        raise HTTPException(status_code=409, detail="Customer email already exists")
+    for key, value in values.items(): setattr(customer, key, value)
+    await db.commit(); await db.refresh(customer)
+    return customer
+
+@router.delete("/{customer_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_customer(customer_id: int, db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin"))):
+    customer = await db.get(Customer, customer_id)
+    if not customer: raise HTTPException(status_code=404, detail="Customer not found")
+    if await db.scalar(select(func.count()).select_from(Customer).join(Customer.tickets).where(Customer.id == customer_id)):
+        raise HTTPException(status_code=409, detail="Customer has service tickets and cannot be deleted")
+    await db.delete(customer); await db.commit()
