@@ -1,5 +1,4 @@
 export const environment = {
   production: true,
-  // Updated automatically after the Render service URL is confirmed.
-  apiUrl: 'https://opsflow-api.onrender.com/api/v1',
+  apiUrl: 'https://opsflow-api-81vr.onrender.com/api/v1',
 };
