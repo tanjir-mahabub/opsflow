@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import require_roles
 from app.core.database import get_db
 from app.models import InventoryItem, User
-from app.schemas.domain import InventoryCreate, InventoryOut
+from app.schemas.domain import InventoryCreate, InventoryOut, InventoryUpdate
 
 router = APIRouter()
 
@@ -33,3 +33,17 @@ async def adjust_stock(item_id: int, change: int, db: AsyncSession = Depends(get
     if item.quantity + change < 0: raise HTTPException(status_code=422, detail="Insufficient stock")
     item.quantity += change; await db.commit(); await db.refresh(item)
     return serialize(item)
+
+@router.patch("/{item_id}", response_model=InventoryOut)
+async def update_item(item_id: int, data: InventoryUpdate, db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin","manager"))):
+    item = await db.get(InventoryItem, item_id)
+    if not item: raise HTTPException(status_code=404, detail="Inventory item not found")
+    for key, value in data.model_dump(exclude_unset=True).items(): setattr(item, key, value)
+    await db.commit(); await db.refresh(item)
+    return serialize(item)
+
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_item(item_id: int, db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin"))):
+    item = await db.get(InventoryItem, item_id)
+    if not item: raise HTTPException(status_code=404, detail="Inventory item not found")
+    await db.delete(item); await db.commit()
