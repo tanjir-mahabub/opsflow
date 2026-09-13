@@ -1,22 +1,27 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, signal } from '@angular/core';
-import { ApiService } from './core/api.service';
+import { Component, HostListener, OnInit, computed, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ApiService, ApiTicket, Customer, InventoryItem, Invoice, Stats, TeamMember } from './core/api.service';
 
-interface Ticket { id:string; customer:string; device:string; service:string; status:string; priority:string; owner:string; due:string }
-
-@Component({selector:'app-root',imports:[CommonModule],templateUrl:'./app.html',styleUrl:'./app.scss'})
+type ModalType='ticket'|'customer'|'inventory'|'invoice'|null;
+@Component({selector:'app-root',imports:[CommonModule,FormsModule],templateUrl:'./app.html',styleUrl:'./app.scss'})
 export class App implements OnInit {
-  menuOpen=signal(false); dark=signal(false); active=signal('Overview'); query=signal('');
+  menuOpen=signal(false); dark=signal(localStorage.getItem('opsflow_theme')==='dark'); active=signal('Overview'); query=signal(''); loading=signal(true); error=signal(''); toast=signal(''); modal=signal<ModalType>(null);
   nav=[['Overview','⌂'],['Service tickets','◇'],['Customers','♙'],['Team','♧'],['Inventory','□'],['Invoices','▤'],['Reports','⌁']];
-  tickets=signal<Ticket[]>([
-    {id:'#OS-1048',customer:'Nadia Rahman',device:'MacBook Pro 14″',service:'Display replacement',status:'In progress',priority:'High',owner:'AR',due:'Today, 4:30 PM'},
-    {id:'#OS-1047',customer:'Marcus Lee',device:'iPhone 15 Pro',service:'Battery diagnostics',status:'Awaiting parts',priority:'Medium',owner:'SK',due:'Tomorrow'},
-    {id:'#OS-1046',customer:'Ayesha Khan',device:'Dell XPS 13',service:'System recovery',status:'Ready',priority:'Low',owner:'JM',due:'Sep 14'},
-    {id:'#OS-1045',customer:'Daniel Cooper',device:'Samsung S24',service:'Camera module repair',status:'New',priority:'High',owner:'AR',due:'Sep 15'}
-  ]);
-  visible=computed(()=>{const q=this.query().toLowerCase().trim();return q?this.tickets().filter(t=>Object.values(t).some(v=>v.toLowerCase().includes(q))):this.tickets()});
+  tickets=signal<ApiTicket[]>([]); customers=signal<Customer[]>([]); inventory=signal<InventoryItem[]>([]); invoices=signal<Invoice[]>([]); team=signal<TeamMember[]>([]);
+  stats=signal<Stats>({active_tickets:0,completed_tickets:0,customers:0,low_stock_items:0,revenue:0,outstanding:0});
+  ticketDraft={customer_id:0,title:'',device:'',description:'',priority:'medium',due_date:'',assigned_to:null as number|null,estimated_cost:0};
+  customerDraft={name:'',email:'',phone:'',company:''}; itemDraft={sku:'',name:'',category:'',quantity:0,reorder_level:5,unit_cost:0}; invoiceDraft={customer_id:0,ticket_id:null as number|null,subtotal:0,tax:0,discount:0,paid:0,due_date:''};
+  filteredTickets=computed(()=>this.filter(this.tickets(),t=>[t.reference,t.title,t.device,t.status,t.priority,this.customerName(t.customer_id)])); filteredCustomers=computed(()=>this.filter(this.customers(),c=>[c.name,c.email,c.phone,c.company??''])); filteredInventory=computed(()=>this.filter(this.inventory(),i=>[i.sku,i.name,i.category])); filteredInvoices=computed(()=>this.filter(this.invoices(),i=>[i.number,i.status,this.customerName(i.customer_id)]));
   constructor(readonly api:ApiService){}
-  ngOnInit(){this.api.connectDemo().subscribe({next:values=>this.tickets.set(values.map((t,index)=>({id:'#'+t.reference,customer:['Nadia Rahman','Marcus Lee','Ayesha Khan'][index]??'Customer',device:t.device,service:t.title,status:t.status.replaceAll('_',' ').replace(/^./,c=>c.toUpperCase()),priority:t.priority.replace(/^./,c=>c.toUpperCase()),owner:t.assigned_to?'AR':'—',due:t.due_date??'Not set'}))),error:()=>this.api.connected.set(false)})}
-  search(e:Event){this.query.set((e.target as HTMLInputElement).value)}
-  select(label:string){this.active.set(label);this.menuOpen.set(false)}
+  ngOnInit(){this.refresh(true)}
+  refresh(login=false){this.loading.set(true);this.error.set('');const request=login?this.api.connectDemo():this.api.loadWorkspace();request.subscribe({next:data=>{this.tickets.set(data.tickets);this.customers.set(data.customers);this.inventory.set(data.inventory);this.invoices.set(data.invoices);this.team.set(data.team);this.stats.set(data.stats);this.loading.set(false)},error:()=>{this.loading.set(false);this.error.set('Live API is unavailable. Start the backend or verify the deployment URL.');this.api.connected.set(false)}})}
+  filter<T>(items:T[],fields:(item:T)=>unknown[]){const q=this.query().trim().toLowerCase();return !q?items:items.filter(item=>fields(item).some(value=>String(value).toLowerCase().includes(q)))} customerName(id:number){return this.customers().find(c=>c.id===id)?.name??`Customer #${id}`} memberName(id:number|null){return id?this.team().find(m=>m.id===id)?.name??'Unassigned':'Unassigned'}
+  statusCount(status:string){return this.tickets().filter(ticket=>ticket.status===status).length} customerTicketCount(id:number){return this.tickets().filter(ticket=>ticket.customer_id===id).length} memberTicketCount(id:number){return this.tickets().filter(ticket=>ticket.assigned_to===id&&!['completed','cancelled'].includes(ticket.status)).length} invoiceTotal(){return this.invoices().reduce((sum,item)=>sum+item.total,0)} inventoryValue(){return this.inventory().reduce((sum,item)=>sum+item.quantity*item.unit_cost,0)} averageTicketValue(){return this.tickets().length?this.invoiceTotal()/this.tickets().length:0}
+  select(label:string){this.active.set(label);this.query.set('');this.menuOpen.set(false)} search(event:Event){this.query.set((event.target as HTMLInputElement).value)} toggleTheme(){this.dark.update(v=>!v);localStorage.setItem('opsflow_theme',this.dark()?'dark':'light')} open(type:ModalType){this.modal.set(type)} close(){this.modal.set(null)}
+  save(){const type=this.modal();let request;if(type==='ticket')request=this.api.post('/tickets',{...this.ticketDraft,due_date:this.ticketDraft.due_date||null});else if(type==='customer')request=this.api.post('/customers',{...this.customerDraft,company:this.customerDraft.company||null});else if(type==='inventory')request=this.api.post('/inventory',this.itemDraft);else if(type==='invoice')request=this.api.post('/invoices',{...this.invoiceDraft,due_date:this.invoiceDraft.due_date||null});else return;request.subscribe({next:()=>{this.close();this.notice('Saved successfully');this.resetDrafts();this.refresh()},error:(e:any)=>this.notice(e.error?.detail??'Unable to save')})}
+  setTicketStatus(ticket:ApiTicket,status:string){this.api.patch(`/tickets/${ticket.id}`,{status}).subscribe({next:()=>{this.notice('Ticket updated');this.refresh()},error:()=>this.notice('Update failed')})} adjustStock(item:InventoryItem,change:number){this.api.patch(`/inventory/${item.id}/stock?change=${change}`).subscribe({next:()=>this.refresh(),error:(e:any)=>this.notice(e.error?.detail??'Stock update failed')})}
+  recordPayment(invoice:Invoice){const raw=prompt(`Outstanding balance: $${invoice.balance.toFixed(2)}\nPayment amount:`);if(!raw)return;const amount=Number(raw);if(!Number.isFinite(amount)||amount<=0){this.notice('Enter a valid amount');return}this.api.patch(`/invoices/${invoice.id}/payment`,{amount}).subscribe({next:()=>{this.notice('Payment recorded');this.refresh()},error:(e:any)=>this.notice(e.error?.detail??'Payment failed')})}
+  notice(message:string){this.toast.set(message);setTimeout(()=>this.toast.set(''),2600)} resetDrafts(){this.ticketDraft={customer_id:0,title:'',device:'',description:'',priority:'medium',due_date:'',assigned_to:null,estimated_cost:0};this.customerDraft={name:'',email:'',phone:'',company:''};this.itemDraft={sku:'',name:'',category:'',quantity:0,reorder_level:5,unit_cost:0};this.invoiceDraft={customer_id:0,ticket_id:null,subtotal:0,tax:0,discount:0,paid:0,due_date:''}}
+  @HostListener('document:keydown.escape') escape(){this.close();this.menuOpen.set(false)} @HostListener('document:keydown.meta.k',['$event']) focusSearch(event:Event){event.preventDefault();document.querySelector<HTMLInputElement>('.search input')?.focus()}
 }
