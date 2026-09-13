@@ -18,6 +18,7 @@ async def list_tickets(status_value: str | None = Query(None, alias="status"), p
 @router.post("", response_model=TicketOut, status_code=status.HTTP_201_CREATED)
 async def create_ticket(data: TicketCreate, db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin","manager"))):
     if not await db.get(Customer, data.customer_id): raise HTTPException(status_code=404, detail="Customer not found")
+    if data.assigned_to and not await db.get(User, data.assigned_to): raise HTTPException(status_code=404, detail="Assigned technician not found")
     count = await db.scalar(select(func.count()).select_from(Ticket))
     ticket = Ticket(reference=f"OS-{1001 + (count or 0)}", **data.model_dump())
     db.add(ticket); await db.commit(); await db.refresh(ticket)
