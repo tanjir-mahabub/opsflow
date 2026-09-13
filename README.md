@@ -21,6 +21,15 @@ A modern service-business operations platform built as a senior-level Angular an
 - Password: OpsFlow123!
 - API docs: http://localhost:8000/docs
 
+## Production deployment
+
+- Frontend: Vercel, root directory frontend
+- Backend: Render Blueprint using render.yaml
+- Database: Supabase PostgreSQL
+- Set Render DATABASE_URL to the Supabase connection string.
+- Set Render CORS_ORIGINS to the final Vercel URL.
+- Update environment.production.ts if Render assigns a different service URL.
+
 ## Run frontend
 
     cd frontend
