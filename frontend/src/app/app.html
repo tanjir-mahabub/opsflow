@@ -1,0 +1,47 @@
+<div class="shell" [class.dark]="dark()">
+  <aside [class.open]="menuOpen()">
+    <div class="brand"><b>O</b><strong>OpsFlow</strong><small>PRO</small></div>
+    <div class="workspace"><span>AS</span><div><b>Atlas Service Co.</b><small>Business workspace</small></div><i>⌄</i></div>
+    <label>WORKSPACE</label>
+    <nav>
+      @for(item of nav;track item[0]){<button [class.active]="active()===item[0]" (click)="select(item[0])"><i>{{item[1]}}</i><span>{{item[0]}}</span>@if(item[0]==='Service tickets'){<em>8</em>}@if(item[0]==='Inventory'){<em>3</em>}</button>}
+    </nav>
+    <label>MANAGE</label>
+    <nav><button><i>ϟ</i><span>Automations</span><em>2</em></button><button><i>⚙</i><span>Settings</span></button></nav>
+    <div class="upgrade"><b>✦</b><strong>Unlock advanced reports</strong><p>Get deeper operational insights.</p><button>Explore Pro →</button></div>
+    <div class="profile"><span>TM</span><div><b>Tanjir Mahabub</b><small>Administrator</small></div><i>•••</i></div>
+  </aside>
+  @if(menuOpen()){<button class="overlay" (click)="menuOpen.set(false)" aria-label="Close menu"></button>}
+  <main>
+    <header><button class="menu" (click)="menuOpen.set(true)">☰</button><div class="search"><span>⌕</span><input placeholder="Search tickets, customers, invoices…" (input)="search($event)"><kbd>⌘ K</kbd></div><div class="actions"><button (click)="dark.set(!dark())">{{dark()?'☀':'☾'}}</button><button>♢<i></i></button><button class="primary">＋ New ticket</button></div></header>
+    <section>
+      <div class="welcome"><div><small>Workspace / Overview</small><h1>Good morning, Tanjir 👋</h1><p>Here’s what’s happening across your operation today.</p></div><button>▣ &nbsp; Sep 13 – Sep 19, 2026 &nbsp;⌄</button></div>
+      <div class="metrics">
+        <article><div><i class="violet">◇</i><em class="up">↗ 12.5%</em></div><p>Active tickets</p><h2>48</h2><small>6 require attention</small></article>
+        <article><div><i class="amber">◷</i><em class="down">↘ 4.2%</em></div><p>Avg. resolution time</p><h2>2.4 <b>days</b></h2><small>Target: under 3 days</small></article>
+        <article><div><i class="green">$</i><em class="up">↗ 18.2%</em></div><p>Revenue this month</p><h2>$28,450</h2><small>$6,840 pending</small></article>
+        <article><div><i class="blue">☺</i><em class="up">↗ 2.8%</em></div><p>Customer satisfaction</p><h2>94.8%</h2><small>From 126 responses</small></article>
+      </div>
+      <div class="grid">
+        <article class="panel performance">
+          <div class="heading"><div><h3>Service performance</h3><p>Tickets completed over the last 7 days</p></div><button>View report →</button></div>
+          <div class="summary"><div><b>142</b><small>tickets completed</small></div><p><span class="legend current"></span>This week <span class="legend previous"></span>Last week</p></div>
+          <div class="chart"><div class="y"><span>30</span><span>20</span><span>10</span><span>0</span></div><svg viewBox="0 0 700 180" preserveAspectRatio="none"><defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6857e8" stop-opacity=".25"/><stop offset="1" stop-color="#6857e8" stop-opacity="0"/></linearGradient></defs><path class="area" d="M0 145C70 130 90 80 150 97S240 132 300 78 400 107 460 52 570 101 620 47 680 25 700 32V180H0Z"/><path class="old" d="M0 160C80 150 100 122 160 140S240 118 310 127 410 82 470 107 590 73 700 89"/><path class="new" d="M0 145C70 130 90 80 150 97S240 132 300 78 400 107 460 52 570 101 620 47 680 25 700 32"/><circle cx="460" cy="52" r="5"/></svg><div class="x"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></div>
+        </article>
+        <article class="panel workload">
+          <div class="heading"><div><h3>Team workload</h3><p>Active assignments by technician</p></div><button>•••</button></div>
+          @for(p of [{n:'Alex Rivera',r:'Senior technician',a:'AR',v:82,c:'#6757e8',t:12},{n:'Sarah Kim',r:'Hardware specialist',a:'SK',v:68,c:'#258c68',t:9},{n:'James Miller',r:'Software technician',a:'JM',v:52,c:'#d98738',t:7},{n:'Maya Patel',r:'Junior technician',a:'MP',v:38,c:'#3885c7',t:5}];track p.n){<div class="person"><span [style.background]="p.c">{{p.a}}</span><div><b>{{p.n}}<em>{{p.t}} tickets</em></b><small>{{p.r}}</small><i><u [style.width.%]="p.v" [style.background]="p.c"></u></i></div></div>}
+          <button class="capacity">View team capacity</button>
+        </article>
+      </div>
+      <article class="panel tickets">
+        <div class="heading"><div><h3>Recent service tickets</h3><p>Latest activity across all locations</p></div><div><button class="filter">☷ Filter</button><button>View all tickets →</button></div></div>
+        <div class="table"><table><thead><tr><th>Ticket</th><th>Customer & device</th><th>Service</th><th>Status</th><th>Priority</th><th>Assigned</th><th>Due date</th><th></th></tr></thead><tbody>
+          @for(t of visible();track t.id){<tr><td><b>{{t.id}}</b></td><td><b>{{t.customer}}</b><small>{{t.device}}</small></td><td>{{t.service}}</td><td><span class="status" [attr.data-s]="t.status">{{t.status}}</span></td><td><span class="priority" [attr.data-p]="t.priority"><i></i>{{t.priority}}</span></td><td><span class="mini">{{t.owner}}</span></td><td>{{t.due}}</td><td>•••</td></tr>}
+        </tbody></table></div>
+        @if(!visible().length){<div class="empty"><b>No matching tickets</b><p>Try a different search term.</p></div>}
+      </article>
+      <footer><span>OpsFlow operational dashboard</span><span>● All systems operational</span></footer>
+    </section>
+  </main>
+</div>
