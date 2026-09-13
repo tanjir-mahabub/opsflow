@@ -4,11 +4,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.api.router import api_router
 from app.core.config import get_settings
+from app.core.database import engine
+from app.models import Base
+from app.services.seed import seed_demo_data
 
 settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
+    await seed_demo_data()
     yield
 
 app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
