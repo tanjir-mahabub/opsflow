@@ -2,16 +2,18 @@
 
 A modern service-business operations platform built as a senior-level Angular and FastAPI portfolio project.
 
-## Current foundation
+## Product capabilities
 
 - Angular 22 standalone application with Signals
 - Responsive light/dark operational dashboard
-- Searchable service-ticket table and KPI analytics
+- Searchable service-ticket workflow with inline status transitions
 - FastAPI versioned API with typed responses, CORS and centralized errors
 - Docker-ready API and PostgreSQL development environment
 - Frontend and backend smoke tests
 - JWT authentication with Argon2 password hashing and role enforcement
-- Customer, service ticket, inventory and invoice REST APIs
+- Customer CRM, team directory, inventory control, invoices and payment recording
+- Live operational KPIs, executive reports and print-friendly reporting
+- Create workflows with validation, loading, empty, toast and error states
 - Seeded demo workspace and live Angular API integration with offline fallback
 - GitHub Actions, Render and Vercel deployment configuration
 
@@ -49,10 +51,14 @@ Open http://localhost:4200.
 
 Open http://localhost:8000/docs.
 
-## Delivery roadmap
+## Architecture
 
-1. Authentication, tenant isolation and RBAC
-2. Customers, technicians and service-ticket workflow
-3. Inventory, invoices, payments and file storage
-4. Audit trail, WebSocket notifications and rule-based insights
-5. Accessibility, E2E coverage, CI and deployment
+- Feature-oriented Angular UI using Signals and a typed API client
+- Versioned FastAPI REST endpoints with JWT authentication and role guards
+- SQLAlchemy async persistence for SQLite development and Supabase PostgreSQL production
+- Row Level Security enabled for Supabase Data API isolation
+- Dockerized Render backend, Vercel SPA deployment and GitHub Actions CI
+
+## Portfolio scope
+
+OpsFlow is a complete portfolio MVP. Enterprise extensions such as multi-tenant billing, external payment gateways, object storage and real-time notifications are intentionally outside the free-hosting demo scope.
