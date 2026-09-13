@@ -41,7 +41,7 @@
         </tbody></table></div>
         @if(!visible().length){<div class="empty"><b>No matching tickets</b><p>Try a different search term.</p></div>}
       </article>
-      <footer><span>OpsFlow operational dashboard</span><span>● All systems operational</span></footer>
+      <footer><span>OpsFlow operational dashboard</span><span [class.offline]="!api.connected()">● {{api.connected()?'Live API connected':'Demo data · start API to connect'}}</span></footer>
     </section>
   </main>
 </div>
