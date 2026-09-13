@@ -30,7 +30,7 @@ A modern service-business operations platform built as a senior-level Angular an
 - Database: Supabase PostgreSQL
 - Set Render DATABASE_URL to the Supabase pooled connection string (Transaction mode, port 6543) and append `?ssl=require`.
 - Vercel production and preview domains are accepted by the configured CORS regex.
-- Update environment.production.ts if Render assigns a different service URL.
+- Production API: https://opsflow-api-81vr.onrender.com/api/v1
 - PostgreSQL tables have RLS enabled automatically, preventing accidental direct access through Supabase's public Data API.
 
 ## Run frontend
