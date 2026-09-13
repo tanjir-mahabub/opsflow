@@ -4,8 +4,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     app_name: str = "OpsFlow API"
     app_env: str = "development"
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/opsflow"
+    database_url: str = "sqlite+aiosqlite:///./opsflow.db"
     jwt_secret: str = "development-only-secret"
+    jwt_algorithm: str = "HS256"
+    access_token_minutes: int = 60
     cors_origins: str = "http://localhost:4200"
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
