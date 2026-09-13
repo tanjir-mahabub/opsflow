@@ -22,6 +22,12 @@ class CustomerCreate(BaseModel):
     phone: str = Field(min_length=5, max_length=40)
     company: str | None = None
 
+class CustomerUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=120)
+    email: EmailStr | None = None
+    phone: str | None = Field(default=None, min_length=5, max_length=40)
+    company: str | None = None
+
 class CustomerOut(CustomerCreate, ORMModel):
     id: int
     created_at: datetime
@@ -52,6 +58,12 @@ class InventoryCreate(BaseModel):
     reorder_level: int = Field(default=5, ge=0)
     unit_cost: float = Field(default=0, ge=0)
 
+class InventoryUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=160)
+    category: str | None = Field(default=None, min_length=2, max_length=100)
+    reorder_level: int | None = Field(default=None, ge=0)
+    unit_cost: float | None = Field(default=None, ge=0)
+
 class InventoryOut(InventoryCreate, ORMModel):
     id: int
     low_stock: bool = False
@@ -64,3 +76,14 @@ class InvoiceCreate(BaseModel):
 class InvoiceOut(InvoiceCreate, ORMModel):
     id: int; number: str; status: str
     total: float = 0; balance: float = 0
+
+class PaymentIn(BaseModel):
+    amount: float = Field(gt=0)
+
+class DashboardSummary(BaseModel):
+    active_tickets: int
+    completed_tickets: int
+    customers: int
+    low_stock_items: int
+    revenue: float
+    outstanding: float
