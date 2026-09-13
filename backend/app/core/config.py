@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_minutes: int = 60
     cors_origins: str = "http://localhost:4200"
+    cors_origin_regex: str | None = None
+    seed_demo_data: bool = True
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @field_validator("database_url", mode="before")
