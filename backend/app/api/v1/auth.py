@@ -12,7 +12,7 @@ router = APIRouter()
 @router.post("/login", response_model=TokenOut)
 async def login(data: LoginIn, db: AsyncSession = Depends(get_db)) -> TokenOut:
     user = await db.scalar(select(User).where(User.email == data.email))
-    if not user or not verify_password(data.password, user.password_hash):
+    if not user or not user.active or not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     return TokenOut(access_token=create_access_token(user.email, user.role), user=UserOut.model_validate(user))
 
