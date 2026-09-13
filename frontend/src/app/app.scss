@@ -3,3 +3,4 @@
 @media(max-width:800px){aside{transform:translateX(-100%);transition:.25s}aside.open{transform:none;box-shadow:10px 0 35px #0003}.overlay{display:block;position:fixed;inset:0;border:0;background:#11182788;z-index:15}main{margin-left:0}.menu{display:block}header{padding:0 15px}.search{flex:1;margin:0 10px}main>section{padding:23px 16px}.welcome>button{display:none}}
 @media(max-width:560px){.actions .primary,.search kbd{display:none}.welcome h1{font-size:20px}.metrics{gap:8px}.metrics article{padding:13px}.metrics h2{font-size:18px}.panel{padding:14px}.summary{margin-left:25px}.chart svg,.x{left:25px}.workload{display:block}.filter{display:none}footer{flex-direction:column;gap:5px}}
 @media(max-width:375px){.metrics{grid-template-columns:1fr}}
+footer span.offline{color:#c78735}
