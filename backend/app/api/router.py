@@ -6,6 +6,7 @@ from app.api.v1.customers import router as customers_router
 from app.api.v1.tickets import router as tickets_router
 from app.api.v1.inventory import router as inventory_router
 from app.api.v1.invoices import router as invoices_router
+from app.api.v1.team import router as team_router
 
 api_router = APIRouter()
 api_router.include_router(health_router, tags=["system"])
@@ -15,3 +16,4 @@ api_router.include_router(customers_router, prefix="/customers", tags=["customer
 api_router.include_router(tickets_router, prefix="/tickets", tags=["tickets"])
 api_router.include_router(inventory_router, prefix="/inventory", tags=["inventory"])
 api_router.include_router(invoices_router, prefix="/invoices", tags=["invoices"])
+api_router.include_router(team_router, prefix="/team", tags=["team"])
