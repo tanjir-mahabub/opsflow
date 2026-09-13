@@ -10,6 +10,16 @@ A modern service-business operations platform built as a senior-level Angular an
 - FastAPI versioned API with typed responses, CORS and centralized errors
 - Docker-ready API and PostgreSQL development environment
 - Frontend and backend smoke tests
+- JWT authentication with Argon2 password hashing and role enforcement
+- Customer, service ticket, inventory and invoice REST APIs
+- Seeded demo workspace and live Angular API integration with offline fallback
+- GitHub Actions, Render and Vercel deployment configuration
+
+## Demo account
+
+- Email: admin@opsflow.dev
+- Password: OpsFlow123!
+- API docs: http://localhost:8000/docs
 
 ## Run frontend
 
