@@ -2,7 +2,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import text
 from app.api.router import api_router
 from app.core.config import get_settings
 from app.core.database import engine
@@ -15,12 +14,6 @@ settings = get_settings()
 async def lifespan(_: FastAPI):
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
-        if connection.dialect.name == "postgresql":
-            # The API uses its own JWT/RBAC layer. Block direct access through
-            # Supabase's public Data API unless explicit policies are added.
-            for table in Base.metadata.sorted_tables:
-                quoted_name = connection.dialect.identifier_preparer.quote(table.name)
-                await connection.execute(text(f"ALTER TABLE {quoted_name} ENABLE ROW LEVEL SECURITY"))
     if settings.seed_demo_data:
         await seed_demo_data()
     yield
