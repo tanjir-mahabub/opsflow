@@ -2,6 +2,12 @@
 
 A modern service-business operations platform built as a senior-level Angular and FastAPI portfolio project.
 
+## Live application
+
+- Application: https://opsflow-md-tanjir-mahabubs-projects.vercel.app
+- API documentation: https://opsflow-api-81vr.onrender.com/docs
+- API health: https://opsflow-api-81vr.onrender.com/api/v1/health
+
 ## Product capabilities
 
 - Angular 22 standalone application with Signals
@@ -19,8 +25,9 @@ A modern service-business operations platform built as a senior-level Angular an
 
 ## Demo account
 
-- Email: admin@opsflow.dev
-- Password: OpsFlow123!
+- Email: demo@opsflow.dev
+- Password: Demo12345!
+- Access: read-only portfolio workspace
 - API docs: http://localhost:8000/docs
 
 ## Production deployment
@@ -58,6 +65,14 @@ Open http://localhost:8000/docs.
 - SQLAlchemy async persistence for SQLite development and Supabase PostgreSQL production
 - Row Level Security enabled for Supabase Data API isolation
 - Dockerized Render backend, Vercel SPA deployment and GitHub Actions CI
+
+## Engineering decisions
+
+- Public visitors use a dedicated read-only role; mutation authorization is enforced by FastAPI, not merely hidden in the UI.
+- The Angular client restores authenticated sessions from session storage and clears them on logout.
+- Supabase's public Data API roles have no table access. A dedicated server role receives explicit grants and role-scoped RLS policies.
+- Render uses Singapore-region infrastructure and Supabase session pooling for an IPv4-compatible persistent backend.
+- Runtime secrets remain in provider environment variables and are never committed to Git.
 
 ## Portfolio scope
 
