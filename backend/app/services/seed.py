@@ -6,7 +6,11 @@ from app.models import Customer, InventoryItem, Invoice, Ticket, User
 
 async def seed_demo_data() -> None:
     async with SessionLocal() as db:
-        if await db.scalar(select(func.count()).select_from(User)): return
+        demo = await db.scalar(select(User).where(User.email == "demo@opsflow.dev"))
+        if not demo:
+            db.add(User(name="Portfolio Visitor", email="demo@opsflow.dev", password_hash=hash_password("Demo12345!"), role="demo"))
+            await db.commit()
+        if await db.scalar(select(func.count()).select_from(Customer)): return
         admin = User(name="Tanjir Mahabub", email="admin@opsflow.dev", password_hash=hash_password("OpsFlow123!"), role="admin")
         tech = User(name="Alex Rivera", email="alex@opsflow.dev", password_hash=hash_password("OpsFlow123!"), role="technician")
         db.add_all([admin, tech]); await db.flush()
