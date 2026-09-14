@@ -14,7 +14,7 @@ def serialize(item: InventoryItem) -> InventoryOut:
     return result
 
 @router.get("", response_model=list[InventoryOut])
-async def list_inventory(low_stock: bool = False, db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin","manager","technician"))):
+async def list_inventory(low_stock: bool = False, db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin","manager","technician","demo"))):
     statement = select(InventoryItem).order_by(InventoryItem.name)
     if low_stock: statement = statement.where(InventoryItem.quantity <= InventoryItem.reorder_level)
     return [serialize(item) for item in (await db.scalars(statement)).all()]
