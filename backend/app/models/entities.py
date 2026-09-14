@@ -9,6 +9,7 @@ class Role(str, Enum):
     MANAGER = "manager"
     TECHNICIAN = "technician"
     CUSTOMER = "customer"
+    DEMO = "demo"
 
 class TicketStatus(str, Enum):
     NEW = "new"
