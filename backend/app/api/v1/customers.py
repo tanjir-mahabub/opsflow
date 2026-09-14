@@ -9,7 +9,7 @@ from app.schemas.domain import CustomerCreate, CustomerOut, CustomerUpdate
 router = APIRouter()
 
 @router.get("", response_model=list[CustomerOut])
-async def list_customers(q: str = "", limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0), db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin","manager","technician"))):
+async def list_customers(q: str = "", limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0), db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin","manager","technician","demo"))):
     statement = select(Customer).order_by(Customer.created_at.desc()).limit(limit).offset(offset)
     if q:
         statement = statement.where(or_(Customer.name.ilike(f"%{q}%"), Customer.email.ilike(f"%{q}%"), Customer.phone.ilike(f"%{q}%")))
@@ -24,7 +24,7 @@ async def create_customer(data: CustomerCreate, db: AsyncSession = Depends(get_d
     return customer
 
 @router.get("/{customer_id}", response_model=CustomerOut)
-async def get_customer(customer_id: int, db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin","manager","technician"))):
+async def get_customer(customer_id: int, db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin","manager","technician","demo"))):
     customer = await db.get(Customer, customer_id)
     if not customer: raise HTTPException(status_code=404, detail="Customer not found")
     return customer
