@@ -18,7 +18,10 @@ export class ApiService {
   readonly user=signal<TeamMember|null>(null);
   readonly connected=signal(false);
   constructor(private readonly http:HttpClient){}
-  connectDemo(){return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`,{email:'admin@opsflow.dev',password:'OpsFlow123!'}).pipe(tap(response=>{this.token=response.access_token;sessionStorage.setItem('opsflow_token',this.token);this.user.set(response.user);this.connected.set(true)}),switchMap(()=>this.loadWorkspace()))}
+  login(email:string,password:string){return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`,{email,password}).pipe(tap(response=>{this.token=response.access_token;sessionStorage.setItem('opsflow_token',this.token);sessionStorage.setItem('opsflow_user',JSON.stringify(response.user));this.user.set(response.user);this.connected.set(true)}),switchMap(()=>this.loadWorkspace()))}
+  connectDemo(){return this.login('demo@opsflow.dev','Demo12345!')}
+  restoreSession(){const stored=sessionStorage.getItem('opsflow_user');if(stored&&this.token){this.user.set(JSON.parse(stored));this.connected.set(true);return true}return false}
+  logout(){this.token='';this.user.set(null);this.connected.set(false);sessionStorage.removeItem('opsflow_token');sessionStorage.removeItem('opsflow_user')}
   loadWorkspace(){return forkJoin({tickets:this.get<ApiTicket[]>('/tickets'),customers:this.get<Customer[]>('/customers'),inventory:this.get<InventoryItem[]>('/inventory'),invoices:this.get<Invoice[]>('/invoices'),team:this.get<TeamMember[]>('/team'),stats:this.get<Stats>('/dashboard/stats')})}
   get<T>(path:string){return this.http.get<T>(`${this.baseUrl}${path}`,{headers:this.headers()})}
   post<T>(path:string,body:unknown){return this.http.post<T>(`${this.baseUrl}${path}`,body,{headers:this.headers()})}
