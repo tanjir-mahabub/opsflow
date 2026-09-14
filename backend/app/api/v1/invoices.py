@@ -15,7 +15,7 @@ def serialize(invoice: Invoice) -> InvoiceOut:
     return output
 
 @router.get("", response_model=list[InvoiceOut])
-async def list_invoices(db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin","manager"))):
+async def list_invoices(db: AsyncSession = Depends(get_db), _: User = Depends(require_roles("admin","manager","demo"))):
     return [serialize(value) for value in (await db.scalars(select(Invoice).order_by(Invoice.created_at.desc()))).all()]
 
 @router.post("", response_model=InvoiceOut, status_code=status.HTTP_201_CREATED)
