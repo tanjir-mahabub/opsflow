@@ -9,12 +9,14 @@ def test_health() -> None:
 
 def test_demo_login_and_ticket_access() -> None:
     with TestClient(app) as client:
-        login = client.post("/api/v1/auth/login", json={"email": "admin@opsflow.dev", "password": "OpsFlow123!"})
+        login = client.post("/api/v1/auth/login", json={"email": "demo@opsflow.dev", "password": "Demo12345!"})
         assert login.status_code == 200
         token = login.json()["access_token"]
         response = client.get("/api/v1/tickets", headers={"Authorization": f"Bearer {token}"})
         assert response.status_code == 200
         assert len(response.json()) >= 3
+        forbidden = client.post("/api/v1/customers", headers={"Authorization": f"Bearer {token}"}, json={"name": "Blocked Write", "email": "blocked@example.com", "phone": "+8801700000000"})
+        assert forbidden.status_code == 403
 
 def test_authenticated_operations_workflow() -> None:
     with TestClient(app) as client:
